@@ -1,0 +1,525 @@
+{
+  "info": {
+    "name": "eiem.beauty localhost API",
+    "description": "Jalankan dengan environment eiembeauty localhost. Cookie jar harus aktif. Registrasi menghasilkan nomor otomatis bila phone kosong; checkout contoh 5 EI-A01 + 3 EI-A03. Data pengujian tersimpan pada database lokal.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Health",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Database siap\", () => pm.expect(pm.response.json().status).to.eql(\"ok\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Distributor",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/distributors"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Dua distributor seed\", () => pm.expect(pm.response.json().length).to.eql(2));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Outlet STD",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/outlets?distributor=STD"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Outlet distributor STD\", () => pm.expect(pm.response.json().map(x=>x.kode_outlet)).to.include(\"BAL-STD-00240\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Outlet JKT",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/outlets?distributor=JKT"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Outlet terfilter\", () => pm.expect(pm.response.json().map(x=>x.kode_outlet)).to.eql([\"JKT-001\"]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Registrasi",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone_number\": \"{{phone}}\",\n  \"user_name\": \"Postman Demo\",\n  \"password\": \"{{password}}\",\n  \"kode_distributor\": \"STD\",\n  \"kode_outlet\": \"BAL-STD-00240\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"phone\")) pm.environment.set(\"phone\", \"08\" + Date.now().toString().slice(-10));",
+              "pm.environment.set(\"idempotency_key\", pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [201, 409]\", function () { pm.expect(pm.response.code).to.be.oneOf([201, 409]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Login salah - validasi",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone_number\": \"{{phone}}\",\n  \"password\": \"wrong-password\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [401]\", function () { pm.expect(pm.response.code).to.be.oneOf([401]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone_number\": \"{{phone}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Akun dan outlet benar\", () => pm.expect(pm.response.json().kode_outlet).to.eql(\"BAL-STD-00240\"));",
+              "pm.test(\"Cookie HttpOnly\", () => pm.expect(pm.response.headers.get(\"Set-Cookie\")).to.include(\"HttpOnly\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Akun aktif",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Nomor akun aktif\", () => pm.expect(pm.response.json().phone_number).to.eql(pm.environment.get(\"phone\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Katalog",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/products"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Tiga produk\", () => pm.expect(pm.response.json().length).to.eql(3));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Preview checkout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/checkout/preview",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    {\n      \"kode_sku\": \"EI-A01\",\n      \"quantity\": 5\n    },\n    {\n      \"kode_sku\": \"EI-A03\",\n      \"quantity\": 3\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"8 unit Rp300000\", () => { const x=pm.response.json(); pm.expect(x.total_quantity).to.eql(8); pm.expect(x.total_price).to.eql(300000); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 Tolak kuantitas nol",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "invalid-quantity-test-key"
+          }
+        ],
+        "url": "{{base_url}}/orders",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    {\n      \"kode_sku\": \"EI-A01\",\n      \"quantity\": 0\n    }\n  ],\n  \"expected_total\": 300000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [400]\", function () { pm.expect(pm.response.code).to.be.oneOf([400]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 Simpan pesanan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{idempotency_key}}"
+          }
+        ],
+        "url": "{{base_url}}/orders",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    {\n      \"kode_sku\": \"EI-A01\",\n      \"quantity\": 5\n    },\n    {\n      \"kode_sku\": \"EI-A03\",\n      \"quantity\": 3\n    }\n  ],\n  \"expected_total\": 300000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200, 201]\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+              "pm.test(\"Order number tersedia\", () => pm.expect(pm.response.json().order_number).to.match(/^CAS-/));",
+              "pm.environment.set(\"order_number\", pm.response.json().order_number);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 Retry pesanan yang sama",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{idempotency_key}}"
+          }
+        ],
+        "url": "{{base_url}}/orders",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    {\n      \"kode_sku\": \"EI-A01\",\n      \"quantity\": 5\n    },\n    {\n      \"kode_sku\": \"EI-A03\",\n      \"quantity\": 3\n    }\n  ],\n  \"expected_total\": 300000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Tidak duplikat\", () => {pm.expect(pm.response.json().order_number).to.eql(pm.environment.get(\"order_number\"));pm.expect(pm.response.json().replayed).to.eql(true);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 Riwayat",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Order berada di riwayat\", () => pm.expect(pm.response.json().map(x=>x.order_number)).to.include(pm.environment.get(\"order_number\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{order_number}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+              "pm.test(\"Detail, harga, dan jumlah tersimpan\", () => {const x=pm.response.json();pm.expect(x.total_price).to.eql(300000);pm.expect(x.total_quantity).to.eql(8);pm.expect(x.items.length).to.eql(2);pm.expect(x.order_status).to.eql(\"Menunggu Diproses\");});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/auth/logout",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [200]\", function () { pm.expect(pm.response.code).to.be.oneOf([200]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 Akun setelah logout",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP [401]\", function () { pm.expect(pm.response.code).to.be.oneOf([401]); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

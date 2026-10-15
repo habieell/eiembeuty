@@ -1,0 +1,47 @@
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/Poppins-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/Poppins-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: Poppins;
+  src: url("/fonts/Poppins-SemiBold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+body {
+  font-family: Poppins, Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3 {
+  font-weight: 500;
+}
+label,
+.btn {
+  font-weight: 500;
+}
+.price,
+.grand-total strong {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.hero-mark {
+  z-index: 1;
+}
+@media (max-width: 540px) {
+  .hero-mark {
+    display: none;
+  }
+}

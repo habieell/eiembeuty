@@ -1,0 +1,6 @@
+{
+ "name":"eiembeauty-local-tools","private":true,"type":"module",
+ "scripts":{"db":"node postgres.mjs","test:api":"newman run ../postman/eiembeauty.postman_collection.json -e ../postman/localhost.postman_environment.json"},
+ "dependencies":{"embedded-postgres":"^18.0.0-beta.0"},
+ "devDependencies":{"newman":"^6.2.1"}
+}

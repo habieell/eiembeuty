@@ -1,0 +1,119 @@
+PART word/document.xml
+Soal Coding Test
+IT Developer – PT Cantik Alami Sehat
+Buatkan web mobile untuk pemesanan produk-produk eiem.beauty berikut :
+Flowchart
+Tables
+Ms User
+Field Name
+Type
+Primary Key
+PhoneNumber
+varchar
+PK
+UserName
+varchar
+UserPassword
+varchar
+KodeOutlet
+varchar
+KodeDistributor
+varchar
+MsDistributor
+Field Name
+Type
+Primary Key
+KodeDistributor
+varchar
+PK
+NamaDistributor
+varchar
+MsOutlet
+Field Name
+Type
+Primary Key
+KodeOutlet
+varchar
+PK
+NamaOutlet
+varchar
+KodeDistributor
+varchar
+MsProduct
+Field Name
+Type
+Primary Key
+KodeSKU
+varchar
+PK
+NamaSKU
+varchar
+ImageURL
+varchar
+HargaJual
+decimal
+TrOrderHeader
+Field Name
+Type
+Primary Key
+OrderNumber
+varchar
+PK
+OrderDate
+varchar
+PhoneNumber
+varchar
+KodeOutlet
+varchar
+KodeDistributor
+varchar
+OrderStatus
+varchar
+TrOrderDetail
+Field Name
+Type
+Primary Key
+OrderNumber
+varchar
+PK
+LineNumber
+varchar
+PK
+KodeSKU
+varchar
+QtyOrdered
+varchar
+UnitPrice
+varchar
+TotalPrice
+varchar
+Halaman Login :
+Halaman Registrasi :
+Halaman Dashboard :
+Halaman Buat Pesanan :
+Halaman Keranjang :
+Halaman Checkout :
+Halaman Riwayat Pesanan :
+Images :
+Logo eiem.beauty
+Gambar Products
+EI-A01 : Acne + Anti Aging Serum
+EI-A02 : Hydration Booster Serum
+EI-A03 : Brightening Serum
+
+PART word/theme/theme1.xml
+
+
+PART word/settings.xml
+
+
+PART word/numbering.xml
+
+
+PART word/styles.xml
+
+
+PART word/webSettings.xml
+
+
+PART word/fontTable.xml
